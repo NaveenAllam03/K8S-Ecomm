@@ -1,0 +1,61 @@
+apiVersion: v1 
+kind: secret
+metadata: 
+  name: secret-payment
+  namespace: Ecomm-01 
+type: opaque
+data:
+- AMPQ_USER:
+- AMPQ_PASS: 
+
+  
+---  
+apiVersion: apps/v1 
+kind: deployment
+metadata:
+  name: payment
+  namespace: Ecomm-01
+  labels:
+    app: payment
+    project: Ecomm
+    tier: api-tier
+spec:
+  replicas: 3
+  selector:
+    MatchLabels:
+      app: payment
+      project: Ecomm    
+      tier: api-tier
+  template:
+    metadata:
+      labels:
+        app: payment
+        project: Ecomm    
+        tier: api-tier 
+    spec:
+      containers:
+      - name: payment
+        image: naveenallam/payment:v1
+        imagePullPolicy: Always
+        resources:
+          requests:
+          limits:
+        envFrom:
+        - secretRef:
+            name: secret-payment
+---
+apiVerison: v1 
+kind: service
+metadata:
+  name: payment
+  namespace: Ecomm-01 
+spec:   
+  selector: 
+    app: payment
+    project: Ecomm    
+    tier: api-tier 
+  ports:
+  - protocol: TCP
+    port: 8080       # service Opens this port 
+    targetPort: 8080 # App in the pod opens this port
+      

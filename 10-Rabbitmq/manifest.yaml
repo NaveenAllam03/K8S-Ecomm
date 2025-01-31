@@ -1,0 +1,61 @@
+apiVersion: v1 
+kind: secret
+metadata: 
+  name: secret-rabbitMq
+  namespace: Ecomm-01 
+type: opaque
+data:
+- RABBIT_MQ_DEFAULT_USER:
+- RABBIT_MQ_DEFAULT_PASS: 
+
+  
+---  
+apiVersion: apps/v1 
+kind: deployment
+metadata:
+  name: rabbitmq
+  namespace: Ecomm-01
+  labels:
+    app: rabbitmq
+    project: Ecomm
+    tier: db-tier
+spec:
+  replicas: 3
+  selector:
+    MatchLabels:
+      app: rabbitmq
+      project: Ecomm    
+      tier: db-tier
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+        project: Ecomm    
+        tier: db-tier 
+    spec:
+      containers:
+      - name: rabbitmq
+        image: nginx:latest
+        imagePullPolicy: Always
+        resources:
+          requests:
+          limits:
+        envFrom:
+        - secretRef:
+            name: secret-rabbitMq
+---
+apiVerison: v1 
+kind: service
+metadata:
+  name: rabbitmq
+  namespace: Ecomm-01 
+spec:   
+  selector: 
+    app: rabbitmq
+    project: Ecomm    
+    tier: db-tier 
+  ports:
+  - protocol: TCP
+    port: 5672       # service Opens this port 
+    targetPort: 5672 # App in the pod opens this port
+      

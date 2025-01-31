@@ -1,0 +1,82 @@
+# Manifest file for catalogue
+
+# This created ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata: 
+  name: mysql
+  namespace: Ecomm-01
+data:
+  MYSQL_DATABASE: "Cities"
+---
+apiVerison: v1 
+kind: secret 
+metadata:
+  name: secret-mysql
+  namespace: Ecomm-01
+type: Opaque  
+data: # This all values should be taken as base64 encoding
+  MYSQL_ROOT_PASSWORD: Um9ib1Nob3BAMQ==
+  MYSQL_USER: c2hpcHBpbmc=
+  MYSQL_PASSWORD: Um9ib1Nob3BAMQ==
+    
+---
+# This creates Deployment 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deploy-mysql
+  namespace: Ecomm-01
+  labels:
+    app: mysql
+    project: Ecomm
+    tier: db-tier 
+spec:
+  replicaSet: 1
+  selector:
+    MatchLabels:
+      app: mysql
+      project: Ecomm
+      tier: db-tier   
+  template:
+    metadata:
+      Labels:
+        app: mysql
+        project: Ecomm
+        tier: db-tier  
+    spec:
+      containers:
+      - name: mysql
+        image: naveenallam/mysql:v1
+        imagePullPolicy: Always
+        resources:
+          requests:
+          limits:  
+        envFrom: 
+        - ConfigMapRef:
+            name: mysql # It will take ENV from mentioned file name.
+        - SecretRef: 
+            name: secret-mysql
+    
+---
+# This creates ClusterIp for communication in the Deployment
+apiVersion: v1
+kind: service
+metadata:
+  name: clusterIP-mysql
+  namespace: Ecomm-01
+spec:
+  selector:
+    app: mysql
+    project: Ecomm
+    tier: db-tier 
+  ports:
+  - protocol: TCP
+    port: 3306 # servicePort
+    targetPort: 3306 # ContainerPort
+
+      
+                
+             
+              
+                  

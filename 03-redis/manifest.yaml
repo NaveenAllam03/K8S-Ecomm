@@ -1,0 +1,67 @@
+# # Manifest file for catalogue
+
+# # This created ConfigMap
+# apiVersion: v1
+# kind: ConfigMap
+# metadata: 
+#   name: configMapforENV
+#   namespace: Ecomm-01
+# data:
+#   MONGO: "true"
+---
+# This creates Deployment 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deploy-redis
+  namespace: Ecomm-01
+  labels:
+    app: redis
+    project: Ecomm
+    tier: db-tier
+spec:
+  replicaSet: 1
+  selector:
+    MatchLabels:
+      app: redis
+      project: Ecomm
+      tier: db-tier  
+  template:
+    metadata:
+      Labels:
+        app: redis
+        project: Ecomm
+        tier: db-tier 
+    spec:
+      containers:
+      - name: redis
+        image: redis
+        imagePullPolicy: Always
+        resources:
+          requests:
+          limits:  
+        envFrom: 
+        - ConfigMapRef:
+            name: configMapforENV # It will take ENV from mentioned file name.
+---
+# This creates ClusterIp for communication in the Deployment
+apiVersion: v1
+kind: service
+metadata:
+  name: clusterIP-redis
+  namespace: Ecomm-01
+spec:
+  selector:
+    app: redis
+    project: Ecomm
+    tier: db-tier
+  ports:
+  - protocol: TCP
+    port: 6379 # servicePort
+    targetPort: 6379 # ContainerPort
+
+      
+                
+             
+              
+                  

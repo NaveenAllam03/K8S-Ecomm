@@ -1,0 +1,57 @@
+# step-by-step of what does this file create
+# 1. It will create a Deployment in the given namespace
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deploy-mongodb
+  namespace: Ecomm-01
+  labels: # This are deployment labels
+    app: mongodb
+    project: Ecomm
+    tier: dbtier
+spec:
+  replicas: 1
+  selector:
+    matchLabels: # Replica_set finds this labels and attaches to them to create the replicas of the service, mostly pod labels are placed here to create multiple replicas of pod
+      app: mongodb
+      project: Ecomm
+      tier: dbtier  
+  template:
+    metadata:
+      labels: # This are pod labels.
+        app: mongodb
+        project: Ecomm
+        tier: dbtier 
+    spec:
+      containers:
+      - name: mongodb01
+        image: naveenallam/mongodb:v1
+        imagePullPolicy: Always # Always pulls the latest image when manifest file is refreshed.
+        resources:
+          requests:
+          limits:
+
+---
+# This file is to enable the communication to the above resource your creating and, Choose a service based on the resource creation
+# ClusterIp - For internal communication only
+# NodePort - Using this we expose certain resources to outer world
+
+apiVersion: v1
+kind: service
+metadata: 
+  name: mongodb-cluster-IP
+  namespace: Ecomm-01
+spec:
+  selector:   
+    app: mongodb
+    project: Ecomm
+    tier: dbtier
+  ports:
+  - protocol: TCP
+    port: 27017
+    targetPort: 27017  
+
+
+
+

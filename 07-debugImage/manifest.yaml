@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: pod
+metadata:
+  name: debug
+spec:
+  containers:
+    name: debuggingPod
+    image: naveenallam/debug:v1
+    command: ["sleep","<any number>"]
